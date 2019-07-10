@@ -25,9 +25,7 @@ class App extends Component {
           calories: food.calories}
         )
       })
-      console.log(foods)
       this.setState({ foods: foods })
-      console.log("state", this.state.foods)
     })
 
     fetch('https://lower-goose-93602.herokuapp.com/api/v1/meals')
@@ -37,12 +35,11 @@ class App extends Component {
       let meals = data.map((meal) => {
         return(
           {id: meal.id,
-          name: meal.name}
+          name: meal.name,
+          foods: meal.foods}
         )
       })
-      console.log(meals)
       this.setState({ meals: meals })
-      console.log("state", this.state.meals)
     })
   }
 
@@ -73,7 +70,6 @@ class App extends Component {
   }
 
   deleteMeal = (id) => {
-    console.log(id);
     const filteredMeals = this.state.meals.filter(meal => meal.id != id);
 
     this.setState({ meals: filteredMeals });
@@ -99,6 +95,7 @@ class App extends Component {
           <Form addFood={this.addFood} />
           <Foods foods={this.state.foods} deleteFood={this.deleteFood} />
           <Meals meals={this.state.meals} deleteMeal={this.deleteMeal} />
+          // this.state.filter === 'meals' &&
         </main>
       )
     }
