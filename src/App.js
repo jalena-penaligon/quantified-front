@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Foods from './Foods';
 import Meals from './Meals';
+import Recipes from './Recipes';
 import Form from './Form';
 import './App.css'
 
@@ -9,12 +10,14 @@ class App extends Component {
     super();
     this.state = {
       foods: [],
-      meals: []
+      meals: [],
+      recipes: [],
+      filter: "foods"
     }
   }
 
   componentWillMount () {
-    fetch('http://localhost:4000/api/v1/foods')
+    fetch('https://lower-goose-93602.herokuapp.com/api/v1/foods')
     .then(results => {
       return results.json();
     }).then(data => {
@@ -25,9 +28,7 @@ class App extends Component {
           calories: food.calories}
         )
       })
-      console.log(foods)
       this.setState({ foods: foods })
-      console.log("state", this.state.foods)
     })
 
     fetch('https://lower-goose-93602.herokuapp.com/api/v1/meals')
@@ -37,18 +38,33 @@ class App extends Component {
       let meals = data.map((meal) => {
         return(
           {id: meal.id,
-          name: meal.name}
+          name: meal.name,
+          foods: meal.foods}
         )
       })
-      console.log(meals)
       this.setState({ meals: meals })
-      console.log("state", this.state.meals)
+    })
+
+    fetch('https://polar-basin-91086.herokuapp.com/api/v1/recipes')
+    .then(results => {
+      return results.json();
+    }).then(data => {
+      let recipes = data.map((recipe) => {
+        return(
+          {id: recipe.id,
+          name: recipe.recipeName,
+          type: recipe.foodType,
+          calories: recipe.caloriesPerServing,
+          url: recipe.recipeUrl}
+        )
+      })
+      this.setState({ recipes: recipes })
     })
   }
 
 
   addFood = (newFood) => {
-    fetch('http://localhost:4000/api/v1/foods', {
+    fetch('https://lower-goose-93602.herokuapp.com/api/v1/foods', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ 'food': { 'name': newFood.name, 'calories': newFood.calories } })
@@ -61,7 +77,7 @@ class App extends Component {
   }
 
   deleteFood = (id) => {
-    fetch(`http://localhost:4000/api/v1/foods/${id}`, {
+    fetch(`https://lower-goose-93602.herokuapp.com/api/v1/foods/${id}`, {
       method: 'DELETE',
     })
     .then(response => {
@@ -73,19 +89,21 @@ class App extends Component {
   }
 
   deleteMeal = (id) => {
-    console.log(id);
     const filteredMeals = this.state.meals.filter(meal => meal.id != id);
 
     this.setState({ meals: filteredMeals });
   }
 
   displayFoods = event => {
-    this.setState({ meals: [] })
-    this.setState({ foods: this.state.foods })
+    this.setState({ filter: "foods" })
   }
+
   displayMeals = event => {
-    this.setState({ meals: this.state.meals })
-    this.setState({ foods: [] })
+    this.setState({ filter: "meals" })
+  }
+
+  displayRecipes = event => {
+    this.setState({ filter: "recipes" })
   }
 
 
@@ -96,9 +114,10 @@ class App extends Component {
         <button onClick={event => this.displayMeals(event)}>Meals</button> |
         <button onClick={event => this.displayRecipes(event)}>Recipes</button></nav>
           <h1>Quantified Self</h1>
-          <Form addFood={this.addFood} />
-          <Foods foods={this.state.foods} deleteFood={this.deleteFood} />
-          <Meals meals={this.state.meals} deleteMeal={this.deleteMeal} />
+          {this.state.filter === 'foods' && <Form addFood={this.addFood} />}
+          {this.state.filter === 'recipes' && <Recipes recipes={this.state.recipes} />}
+          {this.state.filter === 'foods' && <Foods foods={this.state.foods} deleteFood={this.deleteFood} />}
+          {this.state.filter === 'meals' && <Meals meals={this.state.meals} deleteMeal={this.deleteMeal} />}
         </main>
       )
     }
